@@ -63,16 +63,33 @@ $app->match('/add', function (Request $request) use ($app) {
             $key = time() . '-' . strtolower(str_replace(array(' ', '_', '/'), '-', $file->getClientOriginalName()));
             $app['aws']->get('s3')->putObject(array(
                 'Bucket' => $app['aws.bucket'],
-                'Key'    => $key,
+                'Key'    => 'images/' . $key,
                 'Body'   => fopen($file->getPathname(), 'r'),
                 'ACL'    => CannedAcl::PUBLIC_READ,
+                'CacheControl' => 'max-age = 3600', // 1h expiry
             ));
+
+
+            $headers = apache_request_headers();
+            $country = $headers["CloudFront-Viewer-Country"];
+            $device = '';
+            if($headers["CloudFront-Is-Mobile-Viewer"] == 'true') $device = $device . 'Mobile';
+            if($headers["CloudFront-Is-Tablet-Viewer"] == 'true') $device = $device . 'Tablet';
+            if($headers["CloudFront-Is-Desktop-Viewer"] == 'true') $device = $device . 'Desktop';
+
+	    $date = new DateTime; 
+            $caption = $request->request->get('photoCaption') ?: 'My cool photo!';
+
+            $fullCaption = '"'. $caption . '"'. ' from ' . $device . ' in ' . $country . ' at ' . $date->format(DateTime::ISO8601);
 
             // Save the photo record to the database
             $query = $app['db']->prepare("INSERT INTO {$app['db.table']} (url, caption) VALUES (:url, :caption)");
+
+ 
             $data = array(
-                ':url'     => "http://{$app['aws.bucket']}.s3.amazonaws.com/{$key}",
-                ':caption' => $request->request->get('photoCaption') ?: 'My cool photo!',
+                // ':url'     => "http://{$app['aws.bucket']}.s3.amazonaws.com/{$key}",
+                ':url'     => "/images/{$key}",
+                ':caption' => $fullCaption,
             );
             if (!$query->execute($data)) {
                 throw new \RuntimeException('Saving the photo to the database failed.');
