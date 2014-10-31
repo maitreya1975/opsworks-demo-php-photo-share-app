@@ -15,8 +15,8 @@ groupadd www
 usermod -a -G www ec2-user
 chown -R root:www /var/www
 chmod 2775 $www
-find $www -type d -exec sudo chmod 2775 {} +
-find $www -type f -exec sudo chmod 0664 {} +
+find $www -type d -exec chmod 2775 {} +
+find $www -type f -exec chmod 0664 {} +
 
 # configure mysql
 service mysqld start
