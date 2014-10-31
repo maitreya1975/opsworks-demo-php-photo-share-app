@@ -36,6 +36,9 @@ mysql -u photoapp -p'photoapp' photoapp -e 'CREATE TABLE photos (
   )'
 
 curl -s https://getcomposer.org/installer | php
+appdir=/root/opsworks-demo-php-photo-share-app/
+cd $appdir
+export COMPOSER_HOME=$appdir
 php composer.phar install
 mv db-connect.php $www
 rm -rf $www/html
