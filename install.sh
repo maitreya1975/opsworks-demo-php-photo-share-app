@@ -21,11 +21,12 @@ find /var/www -type f -exec sudo chmod 0664 {} +
 service mysqld start
 chkconfig mysqld on
 
-mysql -u root -p'' -e 'CREATE USER photoapp@localhost IDENTIFIED BY photoapp; 
+mysqladmin -u root password "photoapp"
+mysql -u root -p'photoapp' -e "CREATE USER photoapp@localhost IDENTIFIED BY 'photoapp'; 
 create database photoapp;
 grant all privileges on photoapp.* to photoapp@localhost;
 flush privileges;
-'
+"
 mysql -u photoapp -p'photoapp' photoapp -e 'CREATE TABLE photos ( 
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     url VARCHAR(255) NOT NULL,
@@ -35,8 +36,9 @@ mysql -u photoapp -p'photoapp' photoapp -e 'CREATE TABLE photos (
 
 curl -s https://getcomposer.org/installer | php
 php composer.phar install
-$www = '/var/www'
+www = '/var/www'
 mv db-connect.php $www
+rm -rf $www/html
 mv html/ $www/html
 mv src/ $www/src
 mv vendor/ $www/vendor
