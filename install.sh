@@ -41,6 +41,18 @@ appdir=/root/opsworks-demo-php-photo-share-app/
 export COMPOSER_HOME=$appdir
 php composer.phar install
 
+# DB config file
+cat <<EOF > db-connect.php
+<?php 
+  define('DB_NAME', 'photoapp');
+  define('DB_USER', 'photoapp');
+  define('DB_PASSWORD', 'photoapp');
+  define('DB_HOST', 'localhost');
+  define('DB_TABLE', 'photos');
+  define('S3_BUCKET', '$1');
+?>
+EOF
+
 # move files
 mv db-connect.php $www
 rm -rf $www/html

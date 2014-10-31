@@ -71,12 +71,18 @@ $app->match('/add', function (Request $request) use ($app) {
 
 
             $headers = apache_request_headers();
-            $country = $headers["CloudFront-Viewer-Country"];
+            $country = $headers["CloudFront-Viewer-Country"] ?: 'Unknown';
             $device = '';
-            if($headers["CloudFront-Is-Mobile-Viewer"] == 'true') $device = $device . 'Mobile';
-            if($headers["CloudFront-Is-Tablet-Viewer"] == 'true') $device = $device . 'Tablet';
-            if($headers["CloudFront-Is-Desktop-Viewer"] == 'true') $device = $device . 'Desktop';
+            $mobile = $headers["CloudFront-Is-Mobile-Viewer"];
+            $tablet = $headers["CloudFront-Is-Tablet-Viewer"];
+            $desktop = $headers["CloudFront-Is-Desktop-Viewer"];
 
+            if($mobile && $mobile == 'true') $device = $device . 'Mobile';
+            if($tablet && $tablet == 'true') $device = $device . 'Tablet';
+            if($desktop && $desktop == 'true') $device = $device . 'Desktop';
+            if($device == '') $device = 'Unknown';
+
+            date_default_timezone_set("UTC");
 	    $date = new DateTime; 
             $caption = $request->request->get('photoCaption') ?: 'My cool photo!';
 
@@ -99,6 +105,7 @@ $app->match('/add', function (Request $request) use ($app) {
             $alert = array('type' => 'success', 'message' => 'Yay! You uploaded a new photo.');
         } catch (Exception $e) {
             // Display an error message
+            error_log($e);
             $alert = array('type' => 'error', 'message' => 'Sorry, there was a problem uploading your photo.');
         }
     }
