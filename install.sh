@@ -10,12 +10,13 @@ service httpd start
 chkconfig httpd on
 
 # change permissions of www directory
+www='/var/www'
 groupadd www
 usermod -a -G www ec2-user
 chown -R root:www /var/www
-chmod 2775 /var/www
-find /var/www -type d -exec sudo chmod 2775 {} +
-find /var/www -type f -exec sudo chmod 0664 {} +
+chmod 2775 $www
+find $www -type d -exec sudo chmod 2775 {} +
+find $www -type f -exec sudo chmod 0664 {} +
 
 # configure mysql
 service mysqld start
@@ -36,7 +37,6 @@ mysql -u photoapp -p'photoapp' photoapp -e 'CREATE TABLE photos (
 
 curl -s https://getcomposer.org/installer | php
 php composer.phar install
-www = '/var/www'
 mv db-connect.php $www
 rm -rf $www/html
 mv html/ $www/html
